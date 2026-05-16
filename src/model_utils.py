@@ -87,7 +87,7 @@ def get_callbacks(
     checkpoint_path: str   = "best_model.keras",
     monitor:         str   = "val_auprc",
 ) -> list:
- 
+
     early_stopping = EarlyStopping(
         monitor=monitor,
         mode="max",
@@ -149,7 +149,7 @@ def find_best_threshold(
     threshold_range:     tuple[float, float] = (0.05, 0.95),
     step:                float = 0.01,
 ) -> dict[str, float]:
- 
+
     thresholds = np.arange(threshold_range[0], threshold_range[1] + step, step)
     rows = [eval_at_threshold(y_true, y_prob, th) for th in thresholds]
 
