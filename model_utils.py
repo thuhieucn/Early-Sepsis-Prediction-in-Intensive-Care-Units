@@ -1,5 +1,5 @@
 """
-Module dùng chung cho toàn bộ pipeline LSTM dự đoán sepsis.
+Shared utilities for the LSTM sepsis prediction pipeline.
 """
 
 from __future__ import annotations
@@ -17,28 +17,28 @@ from sklearn.metrics import (
 )
 
 
-#qSOFA & SOFA
+# qSOFA and SOFA constants
 
-QSOFA_RESP_THRESHOLD: int = 22    # nhịp thở >= 22/phút: dấu hiệu suy hô hấp
-QSOFA_SBP_THRESHOLD:  int = 100   # huyết áp tâm thu <= 100 mmHg: tụt huyết áp
+QSOFA_RESP_THRESHOLD: int = 22    # Respiratory rate >= 22/min: respiratory risk signal.
+QSOFA_SBP_THRESHOLD:  int = 100   # Systolic blood pressure <= 100 mmHg: hypotension.
 
-# SOFA — Bilirubin (liver) thresholds (mg/dL)
+# SOFA - Bilirubin (liver) thresholds (mg/dL)
 SOFA_LIVER_THRESHOLDS: list[float] = [0, 1.2, 2.0, 6.0, 12.0, 1000.0]
 SOFA_LIVER_SCORES:     list[int]   = [0, 1,   2,   3,   4,    4]
 
-# SOFA — Platelets thresholds (×10³/µL)
+# SOFA - Platelet thresholds (x10^3/uL)
 SOFA_PLATELET_THRESHOLDS: list[float] = [0, 20, 50, 100, 150, 10_000]
 SOFA_PLATELET_SCORES:     list[int]   = [4, 3,  2,  1,   0,   0]
 
-# SOFA — MAP thresholds (mmHg)
+# SOFA - MAP thresholds (mmHg)
 SOFA_MAP_THRESHOLDS: list[float] = [0, 70, 1000]
 SOFA_MAP_SCORES:     list[int]   = [1, 0,  0]
 
-# Cửa sổ thời gian cho SOFA worst-case (giờ)
+# Time window for SOFA worst-case aggregation (hours).
 SOFA_WINDOW_HOURS: int = 24
 
 
-# 1. Kiến trúc mô hình
+# 1. Model architecture
 
 def create_bilstm(
     n_units:    int,
@@ -81,7 +81,7 @@ def create_bilstm(
     return model
 
 
-# 2. Callbacks chuẩn cho training
+# 2. Standard training callbacks
 
 def get_callbacks(
     checkpoint_path: str   = "best_model.keras",
@@ -113,7 +113,7 @@ def get_callbacks(
     return [early_stopping, reduce_lr, checkpoint]
 
 
-# 3. Đánh giá mô hình
+# 3. Model evaluation
 
 
 def eval_at_threshold(
@@ -158,8 +158,8 @@ def find_best_threshold(
     if candidates:
         best = max(candidates, key=lambda r: (r["specificity"], r["youden_j"]))
     else:
-        print(f"Không có ngưỡng nào đạt sensitivity >= {min_sensitivity}. "
-              "Fallback sang Youden's J.")
+        print(f"No threshold reached sensitivity >= {min_sensitivity}. "
+              "Falling back to Youden's J.")
         best = max(rows, key=lambda r: r["youden_j"])
 
     return best
@@ -177,7 +177,7 @@ def full_evaluation(
     m     = eval_at_threshold(y_true, y_prob, threshold)
 
     print(f"\n{'='*55}")
-    print(f"  {label} — threshold = {threshold:.2f}")
+    print(f"  {label} - threshold = {threshold:.2f}")
     print(f"{'='*55}")
     print(f"  AUROC        : {auroc:.4f}")
     print(f"  AUPRC        : {auprc:.4f}")
