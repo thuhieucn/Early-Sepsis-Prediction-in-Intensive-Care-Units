@@ -31,8 +31,8 @@ and evaluates single BiLSTM and patient-subset ensemble models.
 |       `-- lstm-model-ensemble.ipynb
 |-- references/
 |   `-- .gitkeep
-|-- requirements.txt
-`-- README.md
+|-- README.md
+`-- requirements.txt
 ```
 
 Main files:
